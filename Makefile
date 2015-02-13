@@ -6,7 +6,7 @@ INC += -I ~/software/leveldb/include/ -I ~/software/boost/include
 all: main.bin read.bin
 
 %.bin: %.cpp DiskVector.hpp
-$(CXX) \
+	$(CXX) \
 		$(CPPFLAGS) \
 		$(INC) \
 		$< -o $@ \
