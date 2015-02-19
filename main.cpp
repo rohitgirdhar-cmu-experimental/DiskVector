@@ -1,4 +1,5 @@
 #include "DiskVector.hpp"
+#include "DiskVectorLMDB.hpp"
 #include <iostream>
 #include <fstream>
 #include <boost/filesystem.hpp>
@@ -6,7 +7,8 @@
 using namespace std;
 namespace fs = boost::filesystem;
 
-#define FPATH "/IUS/vmr105/rohytg/data/selsearch_feats_all_normalized.txt"
+//#define FPATH "/IUS/vmr105/rohytg/data/selsearch_feats_all_normalized.txt"
+#define FPATH "dummy.txt"
 //#define FPATH "marked_feats_all.txt"
 //#define FPATH "/home/rgirdhar/Work/Projects/001_DetectionRetrieval/BgMatchesObjDet/tempdata/marked_feats_all.txt"
 
@@ -23,7 +25,7 @@ void normalize(vector<float>& feat) {
 }
 
 void readAndIndex(fs::path fpath) {
-  DiskVector<vector<float>> d("selsearch_feats_normalized2");
+  DiskVectorLMDB<vector<float>> d("selsearch_feats");
   ifstream ifs(fpath.string().c_str(), ios::in);
   string line;
   float el;
@@ -34,6 +36,10 @@ void readAndIndex(fs::path fpath) {
     while (iss >> el) {
       feat.push_back(el);
     }
+    for ( int j = 0;  j < feat.size(); j++) {
+      cout << feat[j] << " ";
+    }
+    cout << endl;
     normalize(feat);
     d.Put(i, feat);
     i++;
