@@ -36,10 +36,6 @@ void readAndIndex(fs::path fpath) {
     while (iss >> el) {
       feat.push_back(el);
     }
-    for ( int j = 0;  j < feat.size(); j++) {
-      cout << feat[j] << " ";
-    }
-    cout << endl;
     normalize(feat);
     d.Put(i, feat);
     i++;
