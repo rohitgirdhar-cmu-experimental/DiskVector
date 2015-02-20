@@ -67,7 +67,7 @@ class DiskVectorLMDB {
       cerr << "Unable to read element at " << pos << endl;
       return false;
     }
-    char *cstr = new char[data.mv_size];
+    char *cstr = new char[data.mv_size]; // TODO: avoid re-alloc everytime
     memcpy(cstr, data.mv_data, data.mv_size);
     string str(cstr, data.mv_size);
     istringstream iss(str);
