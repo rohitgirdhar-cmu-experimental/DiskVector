@@ -23,16 +23,6 @@ void readAndPrint() {
   }
   high_resolution_clock::time_point t3 = high_resolution_clock::now();
   cout << "LMDB: " << duration_cast<microseconds>(t2 - t1).count() << "us. Leveldb: " << duration_cast<microseconds>(t3 - t2).count() << "us" << endl;
-  /*
-  cout << temp.size() << endl;
-  for (int i = 0; i < temp.size(); i++) {
-    cout << temp[i] << " ";
-  }
-  cout << temp2.size() << endl;
-  for (int i = 0; i < temp2.size(); i++) {
-    cout << temp2[i] << " ";
-  }
-  */
 }
 
 int main() {
