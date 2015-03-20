@@ -38,11 +38,11 @@ public:
     delete db;
   }
 
-  bool Get(int pos, T& output) const {
+  bool Get(long long pos, T& output) const {
     output.clear();
     // read from the leveldb
     string value;
-    leveldb::Slice key((char*)&pos, sizeof(int));
+    leveldb::Slice key((char*)&pos, sizeof(long long));
     leveldb::Status st = db->Get(leveldb::ReadOptions(), key, &value);
     if (!st.ok()) {
       cerr << "Unable to read elt at " << pos << " due to " << st.ToString();
@@ -54,11 +54,11 @@ public:
     return true;
   }
 
-  bool Put(int pos, const T& input) {
+  bool Put(long long pos, const T& input) {
     ostringstream oss;
     boost::archive::binary_oarchive oa(oss);
     oa << input;
-    leveldb::Slice key((char*)&pos, sizeof(int));
+    leveldb::Slice key((char*)&pos, sizeof(long long));
     leveldb::Status st = db->Put(leveldb::WriteOptions(), key, oss.str());
     if (!st.ok()) {
       cerr << "Unable to write at pos " << pos << " due to " << st.ToString();

@@ -37,7 +37,12 @@ class DiskVectorLMDB {
     CHECK_EQ(mdb_env_set_mapsize(mdb_env, 1099511627776), MDB_SUCCESS);  // 1TB
     int READ_FLAG = rdonly ? MDB_RDONLY : 0;
     if (!rdonly) {
-      CHECK_EQ(mkdir(fpath.string().c_str(), 0744), 0);
+      if (!fs::is_directory(_fpath)) {
+        CHECK_EQ(mkdir(fpath.string().c_str(), 0744), 0);
+      } else {
+        cerr << "Warning: A folder already exists at "
+             << _fpath << ". Trying to update that...";
+      }
     }
     CHECK_EQ(mdb_env_open(mdb_env, fpath.string().c_str(), READ_FLAG, 0664), MDB_SUCCESS)
       << "mdb_env_open failed";
