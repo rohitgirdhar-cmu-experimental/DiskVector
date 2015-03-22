@@ -3,7 +3,7 @@ LDFLAGS += -lleveldb -lboost_serialization -lboost_system -lglog -llmdb -lboost_
 LIBS += -L ~/software/leveldb/ -L ~/software/boost/libs
 INC += -I ~/software/leveldb/include/ -I ~/software/boost/include
 
-all: main.bin read.bin
+all: main.bin read.bin trymap.bin
 
 %.bin: %.cpp DiskVector.hpp DiskVectorLMDB.hpp
 	$(CXX) \
