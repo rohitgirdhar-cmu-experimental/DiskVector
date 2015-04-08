@@ -13,3 +13,11 @@ Updates
   times. (A complete benchmark
   comparing LMDB, leveldb etc is [here](http://symas.com/mdb/microbench/)).
   - Code using the `leveldb` backend is still available through the `DiskVector` class.
+
+Note
+-----
+
+- `DiskVectorLMDB` allows for update to the model. It does not support duplicate
+keys, so, if you add another value with a key that already existed, it'll simply
+overwrite it (**without warning**).
+Also, it will not store the old values of the features, so no extra space will be used.
