@@ -34,7 +34,7 @@ class DiskVectorLMDB {
   DiskVectorLMDB(fs::path _fpath, bool _rdonly = false) : 
     fpath(_fpath), putcount(0), rdonly(_rdonly) {
     CHECK_EQ(mdb_env_create(&mdb_env), MDB_SUCCESS) << "mdb_env_create failed";
-    CHECK_EQ(mdb_env_set_mapsize(mdb_env, 1099511627776), MDB_SUCCESS);  // 1TB
+    CHECK_EQ(mdb_env_set_mapsize(mdb_env, 2199023255552), MDB_SUCCESS);  // 2TB
     int READ_FLAG = rdonly ? MDB_RDONLY : 0;
     if (!rdonly) {
       if (!fs::is_directory(_fpath)) {
