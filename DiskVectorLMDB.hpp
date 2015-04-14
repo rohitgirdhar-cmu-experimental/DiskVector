@@ -13,6 +13,8 @@
 #include <glog/logging.h>
 #include <sys/stat.h>
 
+#define PREALLOC_SIZE 10000000
+
 using namespace std;
 namespace fs = boost::filesystem;
 
@@ -29,12 +31,13 @@ class DiskVectorLMDB {
   fs::path fpath; // path to the disk storage
   int putcount;
   int rdonly;
+  char *cstr; // where the read value is stored
 
   public:
   DiskVectorLMDB(fs::path _fpath, bool _rdonly = false) : 
     fpath(_fpath), putcount(0), rdonly(_rdonly) {
     CHECK_EQ(mdb_env_create(&mdb_env), MDB_SUCCESS) << "mdb_env_create failed";
-    CHECK_EQ(mdb_env_set_mapsize(mdb_env, 2199023255552), MDB_SUCCESS);  // 2TB
+    CHECK_EQ(mdb_env_set_mapsize(mdb_env, 2048000000000), MDB_SUCCESS);  // 2TB
     int READ_FLAG = rdonly ? MDB_RDONLY : 0;
     if (!rdonly) {
       if (!fs::is_directory(_fpath)) {
@@ -50,9 +53,11 @@ class DiskVectorLMDB {
       << "mdb_txn_begin failed";
     CHECK_EQ(mdb_open(mdb_txn, NULL, 0, &mdb_dbi), MDB_SUCCESS)
       << "mdb_open failed";
+    cstr = new char[PREALLOC_SIZE];
   }
 
   ~DiskVectorLMDB() {
+    delete[] cstr;
     if (!rdonly)
       CHECK_EQ(mdb_txn_commit(mdb_txn), MDB_SUCCESS) << "mdb_txn_commit failed";
     mdb_close(mdb_env, mdb_dbi);
@@ -61,7 +66,7 @@ class DiskVectorLMDB {
     mdb_env_close(mdb_env);
   }
 
-  bool Get(long long pos, T& output) const {
+  bool Get(long long pos, T& output) {
     output.clear();
     MDB_val key, data;
     string pos_s = to_string(pos);
@@ -72,13 +77,16 @@ class DiskVectorLMDB {
       cerr << "Unable to read element at " << pos << endl;
       return false;
     }
-    char *cstr = new char[data.mv_size]; // TODO: avoid re-alloc everytime
+    if (data.mv_size > PREALLOC_SIZE) {
+      delete[] cstr;
+      cstr = new char[data.mv_size];
+    }
     memcpy(cstr, data.mv_data, data.mv_size);
     string str(cstr, data.mv_size);
     istringstream iss(str);
     boost::archive::binary_iarchive ia(iss);
     ia >> output;
-    delete[] cstr;
+//    delete[] cstr;
     return true;
   }
 
