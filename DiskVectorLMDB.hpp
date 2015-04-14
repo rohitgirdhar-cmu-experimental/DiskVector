@@ -13,8 +13,6 @@
 #include <glog/logging.h>
 #include <sys/stat.h>
 
-#define PREALLOC_SIZE 10000000
-
 using namespace std;
 namespace fs = boost::filesystem;
 
@@ -31,7 +29,6 @@ class DiskVectorLMDB {
   fs::path fpath; // path to the disk storage
   int putcount;
   int rdonly;
-  char *cstr; // where the read value is stored
 
   public:
   DiskVectorLMDB(fs::path _fpath, bool _rdonly = false) : 
@@ -53,11 +50,9 @@ class DiskVectorLMDB {
       << "mdb_txn_begin failed";
     CHECK_EQ(mdb_open(mdb_txn, NULL, 0, &mdb_dbi), MDB_SUCCESS)
       << "mdb_open failed";
-    cstr = new char[PREALLOC_SIZE];
   }
 
   ~DiskVectorLMDB() {
-    delete[] cstr;
     if (!rdonly)
       CHECK_EQ(mdb_txn_commit(mdb_txn), MDB_SUCCESS) << "mdb_txn_commit failed";
     mdb_close(mdb_env, mdb_dbi);
@@ -77,16 +72,13 @@ class DiskVectorLMDB {
       cerr << "Unable to read element at " << pos << endl;
       return false;
     }
-    if (data.mv_size > PREALLOC_SIZE) {
-      delete[] cstr;
-      cstr = new char[data.mv_size];
-    }
+    char *cstr = new char[data.mv_size];
     memcpy(cstr, data.mv_data, data.mv_size);
     string str(cstr, data.mv_size);
     istringstream iss(str);
     boost::archive::binary_iarchive ia(iss);
     ia >> output;
-//    delete[] cstr;
+    delete[] cstr;
     return true;
   }
 
