@@ -14,6 +14,40 @@ Updates
   comparing LMDB, leveldb etc is [here](http://symas.com/mdb/microbench/)).
   - Code using the `leveldb` backend is still available through the `DiskVector` class.
 
+Python Wrapper
+--------------
+
+`DiskVectorLMDB` now supports a python wrapper using Boost.Python.
+
+### Compile
+In `$ROOT_DIR/python`, set path to boost library in `Makefile`, and then `make`
+
+
+### Usage (in python)
+
+The basic API is exactly same as C++, so refer to the C++ code for more info
+
+```python
+>>> import PyDiskVectorLMDB
+>>> stor = PyDiskVectorLMDB.DiskVectorLMDB('temp', False) # 2nd arg is readonly=T/F
+>>> # generate a feature vector to be inserted
+>>> f = PyDiskVectorLMDB.FeatureVector()
+>>> f.append(1)
+>>> f.append(2)
+>>> # insert
+>>> stor.Put(1, f)
+>>> # retrieve
+>>> q = PyDiskVectorLMDB.FeatureVector()
+>>> stor.Get(1, q)
+>>> # Print
+>>> for i in q:
+...   print i
+```
+
+#### Note
+- Currently, only supports a list of floating values to be inserted/retrieved
+from the `DiskVector`. This is the `FeatureVector` datatype used above.
+
 Note
 -----
 
