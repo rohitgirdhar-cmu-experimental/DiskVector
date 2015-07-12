@@ -1,7 +1,7 @@
 CPPFLAGS += -std=c++0x -g
 LDFLAGS += -lleveldb -lboost_serialization -lboost_system -lglog -llmdb -lboost_filesystem
-LIBS += -L ~/software/leveldb/ -L ~/software/boost/libs
-INC += -I ~/software/leveldb/include/ -I ~/software/boost/include
+LIBS += -L ~/software/leveldb/ -L /srv2/rgirdhar/Software/cpp/boost_1_57_0/stage/lib/
+INC += -I ~/software/leveldb/include/ -I /srv2/rgirdhar/Software/cpp/boost_1_57_0/
 
 all: main.bin read.bin trymap.bin
 

@@ -19,6 +19,8 @@ namespace fs = boost::filesystem;
 /**
  * This class stores a vector<T> at every position (hence is actually a 2D vector).
  * Disk based storage powered by OpenLDAP's MDB
+ * NOTE: If this gets stuck at mdb_open command or so while updating,
+ * it might be because of the lock file. Just delete it.
  */
 template<typename T>
 class DiskVectorLMDB {
