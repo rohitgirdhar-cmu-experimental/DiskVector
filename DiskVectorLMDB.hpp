@@ -41,6 +41,8 @@ class DiskVectorLMDB {
     fpath(_fpath), putcount(0), rdonly(_rdonly), compress(_compress) {
     CHECK_EQ(mdb_env_create(&mdb_env), MDB_SUCCESS) << "mdb_env_create failed";
     CHECK_EQ(mdb_env_set_mapsize(mdb_env, 2048000000000), MDB_SUCCESS);  // 2TB
+    // mapsize defines the max size of database, so keep it large
+    //CHECK_EQ(mdb_env_set_mapsize(mdb_env, 2000000000), MDB_SUCCESS);  // 2GB
     int READ_FLAG = rdonly ? MDB_RDONLY : 0;
     if (!rdonly) {
       if (!fs::is_directory(_fpath)) {
@@ -67,7 +69,7 @@ class DiskVectorLMDB {
     mdb_env_close(mdb_env);
   }
 
-  string directGet(long long pos) {
+  string directGet(long long pos) const {
     MDB_val key, data;
     string pos_s = to_string(pos);
     key.mv_size = pos_s.size();
@@ -87,7 +89,7 @@ class DiskVectorLMDB {
     return str;
   }
 
-  bool Get(long long pos, T& output) {
+  bool Get(long long pos, T& output) const {
     output.clear();
     string str = directGet(pos);
     if (str.size() == 0) {
