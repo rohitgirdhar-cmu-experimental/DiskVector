@@ -23,6 +23,7 @@ namespace fs = boost::filesystem;
  * Disk based storage powered by OpenLDAP's MDB
  * NOTE: If this gets stuck at mdb_open command or so while updating,
  * it might be because of the lock file. Just delete it.
+ * TODO: Upgrade to use nicer C++ interface to LMDB: https://github.com/bendiken/lmdbxx
  */
 template<typename T>
 class DiskVectorLMDB {
