@@ -12,12 +12,14 @@
 #include <lmdb.h>
 #include <glog/logging.h>
 #include <sys/stat.h>
+#include "zlib_utils.hpp"
 
 using namespace std;
 namespace fs = boost::filesystem;
 
 /**
- * This class stores a vector<T> at every position (hence is actually a 2D vector).
+ * This class stores a vector<T> at every position
+ * (hence is actually a 2D vector).
  * Disk based storage powered by OpenLDAP's MDB
  * NOTE: If this gets stuck at mdb_open command or so while updating,
  * it might be because of the lock file. Just delete it.
@@ -31,10 +33,11 @@ class DiskVectorLMDB {
   fs::path fpath; // path to the disk storage
   int putcount;
   int rdonly;
+  bool compress;
 
   public:
-  DiskVectorLMDB(fs::path _fpath, bool _rdonly = false) : 
-    fpath(_fpath), putcount(0), rdonly(_rdonly) {
+  DiskVectorLMDB(fs::path _fpath, bool _rdonly = false, bool _compress = false) : 
+    fpath(_fpath), putcount(0), rdonly(_rdonly), compress(_compress) {
     CHECK_EQ(mdb_env_create(&mdb_env), MDB_SUCCESS) << "mdb_env_create failed";
     CHECK_EQ(mdb_env_set_mapsize(mdb_env, 2048000000000), MDB_SUCCESS);  // 2TB
     int READ_FLAG = rdonly ? MDB_RDONLY : 0;
@@ -63,8 +66,7 @@ class DiskVectorLMDB {
     mdb_env_close(mdb_env);
   }
 
-  bool Get(long long pos, T& output) {
-    output.clear();
+  string directGet(long long pos) {
     MDB_val key, data;
     string pos_s = to_string(pos);
     key.mv_size = pos_s.size();
@@ -72,23 +74,35 @@ class DiskVectorLMDB {
     int rc = mdb_get(mdb_txn, mdb_dbi, &key, &data);
     if (rc == MDB_NOTFOUND) {
       cerr << "Unable to read element at " << pos << endl;
-      return false;
+      return "";
     }
     char *cstr = new char[data.mv_size];
     memcpy(cstr, data.mv_data, data.mv_size);
     string str(cstr, data.mv_size);
+    if (compress) {
+      str = zlib_decompress_string(str);
+    }
+    delete[] cstr;
+    return str;
+  }
+
+  bool Get(long long pos, T& output) {
+    output.clear();
+    string str = directGet(pos);
+    if (str.size() == 0) {
+      return false;
+    }
     istringstream iss(str);
     boost::archive::binary_iarchive ia(iss);
     ia >> output;
-    delete[] cstr;
     return true;
   }
 
-  bool Put(long long pos, const T& input) {
-    ostringstream oss;
-    boost::archive::binary_oarchive oa(oss);
-    oa << input;
-    string hash = oss.str();
+  bool directPut(long long pos, const string& input) {
+    string hash = input;
+    if (compress) {
+      hash = zlib_compress_string(hash);
+    }
     mdb_data.mv_size = hash.size();
     mdb_data.mv_data = reinterpret_cast<void*>(&hash[0]);
     string pos_s = to_string(pos);
@@ -103,6 +117,14 @@ class DiskVectorLMDB {
         << "mdb_txn_begin failed";
     }
     return true;
+  }
+
+  bool Put(long long pos, const T& input) {
+    ostringstream oss;
+    boost::archive::binary_oarchive oa(oss);
+    oa << input;
+    string hash = oss.str();
+    return directPut(pos, hash);
   }
 };
 
