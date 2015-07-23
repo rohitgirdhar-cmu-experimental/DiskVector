@@ -28,6 +28,8 @@ main(int argc, char *argv[]) {
      "Path to output feature store")
     ("keyslist,k", po::value<fs::path>()->required(),
      "File with images list")
+    ("startpos,s", po::value<unsigned long long>()->default_value(1),
+     "Position to start reading the file [1 indexed]")
     ;
 
   po::variables_map vm;
@@ -43,6 +45,7 @@ main(int argc, char *argv[]) {
     return -1;
   }
   
+  unsigned long long start_pos = vm["startpos"].as<unsigned long long>();
   fs::path infeatstor_fpath = vm["infeatstor"].as<fs::path>();
   fs::path outfeatstor_fpath = vm["outfeatstor"].as<fs::path>();
   auto infeatstor = std::shared_ptr<DiskVectorLMDB<vector<float>>>(
@@ -61,9 +64,12 @@ main(int argc, char *argv[]) {
   long long key;
   high_resolution_clock::time_point start_time =
     high_resolution_clock::now();
-  long long lno = 0;
+  unsigned long long lno = 0;
   while (fin >> key) {
     lno++;
+    if (lno < start_pos) {
+      continue;
+    }
     string feat = infeatstor->directGet(key);
     if (feat.length() < 0 || ! outfeatstor->directPut(key, feat)) {
       cerr << "Couldn't read/write " << key << endl;
