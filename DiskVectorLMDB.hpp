@@ -12,9 +12,11 @@
 #include <lmdb.h>
 #include <glog/logging.h>
 #include <sys/stat.h>
+#include <chrono>
 #include "zlib_utils.hpp"
 
 using namespace std;
+using namespace std::chrono;
 namespace fs = boost::filesystem;
 
 /**
@@ -83,7 +85,11 @@ class DiskVectorLMDB {
     memcpy(cstr, data.mv_data, data.mv_size);
     string str(cstr, data.mv_size);
     if (compress) {
+      // only for debugging. It takes about 0.5ms per decompress
+      // high_resolution_clock::time_point st = high_resolution_clock::now();
       str = zlib_decompress_string(str);
+      // high_resolution_clock::time_point end = high_resolution_clock::now();
+      // cout << "Time to decompress: " << duration_cast<nanoseconds>(end - st).count() << "ns" << endl;
     }
     delete[] cstr;
     return str;
