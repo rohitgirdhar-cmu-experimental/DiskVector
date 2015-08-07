@@ -1,7 +1,7 @@
 CPPFLAGS += -std=c++0x -g
 LDFLAGS += -lleveldb -lboost_serialization -lboost_system -lglog -llmdb -lboost_filesystem -lboost_program_options -lz
-LIBS += -L ~/software/leveldb/ -L /srv2/rgirdhar/Software/cpp/boost_1_57_0/stage/lib/ -L/srv2/rgirdhar/Software/cpp/zlib/install/lib/
-INC += -I ~/software/leveldb/include/ -I /srv2/rgirdhar/Software/cpp/boost_1_57_0/ -I/srv2/rgirdhar/Software/cpp/zlib/install/include/
+LIBS += -L ~/software/leveldb/ -L /mnt/data/Softwares/CPP/boost/boost_1_57_0/stage/lib/ -L/mnt/data/Softwares/CPP/zlib/install/lib/ -L/mnt/data/Softwares/CPP/lmdb/libraries/liblmdb/
+INC += -I ~/software/leveldb/include/ -I /mnt/data/Softwares/CPP/boost/boost_1_57_0/ -I/mnt/data/Softwares/CPP/zlib/install/include/ -I/mnt/data/Softwares/CPP/lmdb/libraries/liblmdb/
 
 all: main.bin read.bin trymap.bin tools/compressStore.bin
 
